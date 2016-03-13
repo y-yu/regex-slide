@@ -9,6 +9,7 @@
 \beamertemplatenavigationsymbolsempty
 
 \usepackage{luatexja}
+\usepackage{pgfpages}
 \usepackage[hiragino-pro, deluxe, expert]{luatexja-preset}
 \usepackage[osf]{mathpazo}
 \usepackage{fontspec}
@@ -23,6 +24,8 @@
 \usepackage{pgf-umlsd}
 \usepackage{mathtools}
 
+%\setbeameroption{show notes on second screen=right}
+
 \usetikzlibrary{arrows,automata,shapes,backgrounds}
 
 \setmainfont[Numbers=OldStyle, BoldFont=Palatino Bold]{Palatino}
@@ -30,12 +33,12 @@
 \setmonofont{CMU Typewriter Text}
 \setmainjfont[BoldFont=Hiragino Kaku Gothic Pro W6]{Hiragino Kaku Gothic Pro W3}
 
-\title[正規表現 vs C++ 歌舞伎座.tech \#9]{%
-  \href{https://github.com/y-yu/regex-slide}{%
-    正規表現 vs C++ \\ {\normalsize 歌舞伎座.tech \#9}}
+\title[Regular expressions à la carte]{%
+  \href{https://github.com/y-yu/regex-slide}{Regular expressions à la carte} \\
+  \href{http://kbkz.connpass.com/event/26677/}{\normalsize kbkz.tech \#9}
 }
 \author{吉村 優}
-\date\today
+\date{March 20, 2016}
 \institute[\url{https://twitter.com/\_yyu\_}]{%
   \url{https://twitter.com/\_yyu\_}\\
   \url{http://qiita.com/yyu}\\
@@ -86,14 +89,15 @@
   \end{columns}
 \end{frame}
 
-\section{アウトライン}
+\section*{アウトライン}
 \begin{frame}[fragile]
   \frametitle{アウトライン}
 
   \begin{enumerate}
     \item<2-> 正規表現とは？
-    \item<3-> 正規表現の限界
-    \item<4-> 正規表現 vs C++
+    \item<3-> マッチング
+    \item<4-> 正規表現の限界
+    \item<5-> 正規表現 vs C++
   \end{enumerate}
 \end{frame}
 
@@ -147,13 +151,25 @@
         \begin{itemize}
           \item<6-> $X \mid Y$（選択）
           \item<7-> $X Y$（結合）
-          \item<8-> $X *$（0回以上の繰り返し）
+          \item<8-> $X^*$（0回以上の繰り返し）
         \end{itemize}
     \end{itemize}
   \end{block}
 \end{frame}
 
-\subsection{非決定性有限オートマトン（NFA）}
+\section{マッチング}
+\begin{frame}[fragile]
+  \frametitle{マッチング}
+
+  主に次のような方法がある
+  \begin{itemize}
+    \item<2-> 有限オートマトンを用いた方法
+    \item<3-> Virtual Machineを用いた方法
+    \item<4-> 正規表現の微分を用いた方法
+  \end{itemize}
+\end{frame}
+
+\subsection{NFAを用いたマッチング}
 \begin{frame}[fragile]
   \frametitle{非決定性有限オートマトン（NFA）}
   
@@ -183,7 +199,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{非決定性有限オートマトン（NFA）}
+  \frametitle{NFAを用いたマッチング}
 
   \begin{itemize}
     \item 全ての正規表現には対応する非決定性有限オートマトンが存在する
@@ -191,7 +207,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{非決定性有限オートマトン（NFA）}
+  \frametitle{正規表現とNFA}
 
   \begin{Ldescription}
     \item<1->[文字$N(a)$]
@@ -227,7 +243,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{非決定性有限オートマトン（NFA）}
+  \frametitle{正規表現とNFA}
 
   \begin{Ldescription}
     \item<1->[結合$N(st)$]
@@ -242,7 +258,7 @@
       
       \end{tikzpicture}
 
-    \item<2->[繰り返し$N(s*)$]
+    \item<2->[繰り返し$N(s^*)$]
       \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,semithick]
         \tikzstyle{every state}=[fill=green!20, text=black]
       
@@ -253,15 +269,24 @@
         \node[accepting, state]  (D)       [below right of=C] {$f$};
 
 
-        \path (A) edge node              {$\epsilon$} (B)
-                  edge node [loop below] {$\epsilon$} (D)
-              (C) edge node              {$\epsilon$} (D)
-                  edge node [loop above] {$\epsilon$} (B); 
+        \path (A) edge node          {$\epsilon$} (B)
+                  edge node [below]  {$\epsilon$} (D)
+              (C) edge node          {$\epsilon$} (D)
+                  edge node [above]  {$\epsilon$} (B); 
       \end{tikzpicture}
   \end{Ldescription}
 \end{frame}
 
-\subsection{決定性有限オートマトン（DFA）}
+\begin{frame}[fragile]
+  \frametitle{NFAを用いたマッチング}
+
+  \begin{itemize}
+    \item 全ての正規表現には対応する非決定性有限オートマトンが存在する
+    \item 遷移先が一意に決まらないので、バックトラックをする必要がある
+  \end{itemize}
+\end{frame}
+
+\subsection{DFAを用いたマッチング}
 \begin{frame}[fragile]
   \frametitle{決定性有限オートマトン（DFA）}
   
@@ -295,26 +320,134 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{決定性有限オートマトン（DFA）}
+  \frametitle{DFAを用いたマッチング}
   
   \begin{itemize}
     \item<1-> 非決定性有限オートマトンから機械的に変換できる（サブセット構成など）
-    \item<2-> 入力によって状態が一意に決まるので、状態を持つ必要がない
+    \item<2-> 入力によって状態が一意に決まるので、バックトラックをする必要がない
     \item<3-> 非決定有限オートマトンから変換すると、最悪の場合、\textbf{状態数が指数関数的に増加する}
+    \item<4-> そのため、必要になった状態だけ変換するというテクニックがある
   \end{itemize}
+\end{frame}
+
+\subsection{VMを用いたマッチング}
+\begin{frame}[fragile]
+  \frametitle{Virtual Machine（VM）を使ったマッチング}
+
+  \uncover<2->{次のようなVMを用いて正規表現のマッチングが可能}
+
+  \begin{itemize}
+    \item<3-> \texttt{PC}と\texttt{SP}という2つのレジスタがある
+    \item<4-> 次の命令がある
+      \begin{Ldescription}
+        \item<5->[\texttt{char c}] \texttt{SP}の先頭の文字と\texttt{c}を比較
+        \item<6->[\texttt{match}] マッチに成功（スレッドを終了）
+        \item<7->[\texttt{jmp x}] アドレス\texttt{x}へジャンプ（\texttt{PC}を\texttt{x}にする）
+        \item<8->[\texttt{split x, y}] スレッドを二つに分割する。
+          片方は\texttt{PC}を\texttt{x}にし、もう片方は\texttt{PC}を\texttt{y}にする
+      \end{Ldescription}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Virtual Machine（VM）を用いたマッチング}
+
+  正規表現を次のように変換する
+
+  \begin{center}
+    \begin{columns}
+      \begin{column}{0.4\textwidth}
+        \begin{Ldescription}
+          \item<2->[文字（$c$）]
+            \begin{tabular}{l}
+              \texttt{char } $c$ \\
+            \end{tabular}
+
+          \item<4->[選択（$e_1 \mid e_2$）]
+            \begin{tabular}{cl}
+                     & \texttt{split} $L_1\, L_2$  \\
+              $L_1:$ & $e_1$の命令列 \\
+                     & \texttt{jmp} $L_3$ \\
+              $L_2:$ & $e_2$の命令列 \\
+              $L_3:$ & \\
+            \end{tabular}
+        \end{Ldescription}
+      \end{column}
+      \begin{column}{0.4\textwidth}
+        \begin{Ldescription}
+          \item<3->[連結（$e_1e_2$）]
+            \begin{tabular}{l}
+              $e_1$の命令列 \\
+              $e_2$の命令列 \\
+            \end{tabular}
+
+          \item<5->[繰り返し（$e*$）]
+            \begin{tabular}{cl}
+              $L_1:$ & \texttt{split} $L_1\, L_3$  \\
+              $L_2:$ & $e_2$の命令列 \\
+                     & \texttt{jmp} $L_1$ \\
+              $L_3:$ & \\
+            \end{tabular}
+        \end{Ldescription}
+      \end{column}
+    \end{columns}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Virtual Machine（VM）を用いたマッチング}
+
+  正規表現\lstinline|/aa*bb*/|をVMのバイトコードへ変換する
+  
+  \begin{exampleblock}{}
+    \begin{center}
+\begin{lstlisting}[style=vm]
+    char a
+    split 2, 4
+    char a
+    jmp 1
+    char b
+    split 6, 8
+    char b
+    jmp 5
+    match
+\end{lstlisting}
+    \end{center}
+  \end{exampleblock}
+
+  \begin{itemize}
+    \item<2-> VMの命令をLLVMやJVMに変換すれば、より高速になる
+  \end{itemize}
+\end{frame}
+
+\subsection{正規表現の微分を用いたマッチング}
+\begin{frame}
+  \frametitle{正規表現の微分を用いたマッチング}
+
+  \uncover<2->{
+    \begin{block}{正規表現の微分}
+      $c:wc$という文字列があるとする%
+      \footnote[frame]{この文字列$c:wc$は文字$c$が文字列の先頭の1文字で、$cw$は文字列の先頭以外の残りを表す}。
+      ある正規表現$r$が文字列$w:wc$にマッチするならば、
+      $r$を文字$c$で微分した正規表現$r_c$は文字列$wc$にマッチする。
+    \end{block}
+  }
+  
+  \begin{enumerate}
+    \item<3-> マッチング対象の文字列から1文字ずつ取り出し、正規表現を微分していく
+    \item<4-> 文字列が空になった時に、微分された正規表現が空文字を受理するならばマッチングに成功
+  \end{enumerate}
 \end{frame}
 
 \section{正規表現の限界}
 \begin{frame}[fragile]
   \frametitle{正規表現の限界}
 
-  \uncover<2->{
-    \begin{block}{}
-      \centering
-      \Huge
-      \lstinline{/^1?$|^(11+)\1+$/}
-    \end{block}
-  }
+  \begin{block}{}
+    \centering
+    \LARGE
+    \lstinline{/^1?$|^(11+)\1+$/}
+  \end{block}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -338,64 +471,28 @@
   }
 \end{frame}
 
-\subsection{ポンピング補題}
-\begin{frame}
-  \frametitle{ポンピング補題}
-
-  $L$が正規言語\footnote[frame]{正規表現で表現できる言語であるという意味}であるならば、次が成り立つ。
-  \uncover<2->{
-    \begin{block}{}
-      任意の正規言語$L$について、言語$L$についてのみ依存する反復長$l > 0$が存在し、
-      $|w| \ge l$となる全ての$w \in L$について次が成り立つ
-      \begin{enumerate}
-        \item
-          $|y| > 0$かつ$|xy| \le l$となる\ballref{enum:pump_two}を満す$w$の分割$w = xyz$が存在する
-        \item \label{enum:pump_two} 
-          すべての$i \ge 0$について$xy^iz \in L$が成り立つ
-      \end{enumerate}
-    \end{block}
-  }
-\end{frame}
-
-\begin{frame}
-  \frametitle{ポンピング補題}
-
-  非素数言語を$L_{np} = \{1^{\alpha \cdot \beta} \mid \alpha > 1, \beta > 1\}$として、
-  $w = 11\, 11\, 11 \in L_{np}, l = 1$とする
-
-  \uncover<2->{
-    \begin{exampleblock}{反例}
-      $l = 1$かつ$|y| > 0, |xy| \le l = 1$より、$|x| = 0, |y| = 1$となる。
-      従って$w = \underbrace{\phantom{1}}_x \underbrace{1}_y\underbrace{11111}_z$とすると、
-      $|xy^2z| = |xyz| + |y| = 6 + 1 = 7$となり、$7$は素数であることから、
-      $xy^2z \not\in L_{np}$となり、ポンピング補題を満さない
-    \end{exampleblock}
-  }
-\end{frame}
-
 \subsection{正規表現と非正規表現}
 \begin{frame}[fragile]
   \frametitle{正規表現と非正規表現}
 
   \begin{itemize}
-    \item<2->  たとえば、次のものは\textbf{正規}である
+    \item<2-> \textbf{ポンピング補題}などを使うと、
+      正規表現で表せる集合かどうか証明できる
+    \item<3-> たとえば、次のものは\textbf{正規}である
       \begin{itemize}
-        \item ある正規表現の補集合
+        \item ある正規表現の補集合を表す正規表現
         \item 先読み
       \end{itemize}
-    \item<3-> たとえば、次のものは\textbf{非正規}である
+    \item<4-> たとえば、次のものは\textbf{非正規}である
       \begin{itemize}
         \item 後方参照
         \item 再帰
       \end{itemize}
+    \item<5-> 非素数にマッチする正規表現は後方参照を用いていたので、
+      非正規表現である
+    \item<6-> 非正規になると、正規表現が持つよい性質が失われる
   \end{itemize}
 \end{frame}
-
-% {
-%   \setbeamercolor{background canvas}{bg=black}
-%   \begin{frame}[plain]{}
-%   \end{frame}
-% }
 
 \section{正規表現 vs C++}
 \begin{frame}
@@ -446,7 +543,7 @@ int main()
         prog &::= abs \mid prog\, \mathtt{v}\, abs \mid prog\, \mathtt{v}\, app^* 
       \end{align*}
     \item<5-> 文法を\textbf{正規表現}で表せる \\
-      \lstinline{w+((w|W)*v(w|W)*)*}
+      \lstinline{w+(W+w+)*((vw*)(W+w+)*)*}
   \end{itemize}
 \end{frame}
 
@@ -482,7 +579,7 @@ wwwwwWWWWWWWWWWWWWwwwwwwwwwwwwwwwwwwwwwwwww
   \frametitle{RANS}
 
   \begin{block}{RANS}
-    \begin{shadequote}[r]{\scriptsize\href{http://sinya8282.github.io/RANS/}{RANS}}
+    \begin{shadequote}[r]{\scriptsize\url{http://sinya8282.github.io/RANS/}}
       RANS's concept is very simple, just calculates the number from the given string on a regular language.
     \end{shadequote}
   \end{block}
@@ -498,21 +595,29 @@ wwwwwWWWWWWWWWWWWWwwwwwwwwwwwwwwwwwwwwwwwww
   \texttt{Hello, world!}を表示するプログラムは
   \uncover<2->{
     \begin{exampleblock}{}
-      112775122096649474224566186997920802071913037629842902357
-      700708388775797481502194024679890924858811379558008676532
-      504722595317581693682693861063964492969751426762635552473
-      181225392887702354610189054772960585787185954871129315742
-      416465730444244942820749738732299880430019000634772118095
-      75155155 
+      206602040924489026801307911538805854455198744538070639182
+      690880761572424911476339257257386704995410169812907136566
+      327541800453415305636200196255437899960016989064923911660
+      800780259871999465815761462533370076235558393587722548474
+      1358948834773649859816115717
     \end{exampleblock}
     番目のGrassプログラム
   }
 
   \begin{itemize}
-    \item<3-> バイナリにすれば122 Byte
-    \item<4-> C++と比べて36 Byte差
-    \item<5-> Grassの文法を表す正規表現を工夫すれば、もっと小さくなる（かも）
+    \item<3-> バイナリにすれば107 Byte
+    \item<4-> C++と比べて21 Byte差
+    \item<5-> 正規表現を工夫すれば、もっと小さくなる（かも）
   \end{itemize}
+\end{frame}
+
+\section{参考文献}
+\begin{frame}
+  \frametitle{参考文献}
+
+  \nocite{*}
+  \bibliographystyle{jplain}
+  \bibliography{ref}
 \end{frame}
 
 \begin{frame}
@@ -524,102 +629,41 @@ wwwwwWWWWWWWWWWWWWwwwwwwwwwwwwwwwwwwwwwwwww
   {\Huge Thank you for listening!}
 \end{frame}
 
-\section*{マッチング}
-\begin{frame}[fragile]
-  \frametitle{マッチング}
+\section*{付録}
 
-  主に次のような方法がある
-  \begin{itemize}
-    \item<2-> 有限オートマトンを用いた方法
-    \item<3-> Virtual Machineを用いた方法
-    \item<4-> 正規表現の微分を用いた方法
-  \end{itemize}
+\subsection*{ポンピング補題}
+\begin{frame}
+  \frametitle{ポンピング補題}
+
+  $L$が正規言語\footnote[frame]{正規表現で表現できる言語であるという意味}であるならば、次が成り立つ。
+  \uncover<2->{
+    \begin{block}{}
+      任意の正規言語$L$について、言語$L$についてのみ依存する反復長$l > 0$が存在し、
+      $|w| \ge l$となる全ての$w \in L$について次が成り立つ
+      \begin{enumerate}
+        \item
+          $|y| > 0$かつ$|xy| \le l$となる\ballref{enum:pump_two}を満す$w$の分割$w = xyz$が存在する
+        \item \label{enum:pump_two} 
+          すべての$i \ge 0$について$xy^iz \in L$が成り立つ
+      \end{enumerate}
+    \end{block}
+  }
 \end{frame}
 
-\subsection*{VMを使ったマッチング}
-\begin{frame}[fragile]
-  \frametitle{Virtual Machine（VM）を使ったマッチング}
+\begin{frame}
+  \frametitle{ポンピング補題}
 
-  \uncover<2->{次のようなVMを用いて正規表現のマッチングが可能}
+  非素数言語を$L_{np} = \{1^{\alpha \cdot \beta} \mid \alpha > 1, \beta > 1\}$として、
+  $w = 11\, 11\, 11 \in L_{np}, l = 1$とする
 
-  \begin{itemize}
-    \item<3-> \texttt{PC}と\texttt{SP}という2つのレジスタがある
-    \item<4-> 次の命令がある
-      \begin{Ldescription}
-        \item<5->[\texttt{char c}] \texttt{SP}の先頭の文字と\texttt{c}を比較
-        \item<6->[\texttt{match}] マッチに成功（スレッドを終了）
-        \item<7->[\texttt{jmp x}] アドレス\texttt{x}へジャンプ（\texttt{PC}を\texttt{x}にする）
-        \item<8->[\texttt{split x, y}] スレッドを二つに分割する。
-          片方は\texttt{PC}を\texttt{x}にし、もう片方は\texttt{PC}を\texttt{y}にする
-      \end{Ldescription}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Virtual Machine（VM）を使ったマッチング}
-
-  正規表現を次のように変換する
-
-  \begin{center}
-    \begin{columns}
-      \begin{column}{0.4\textwidth}
-        \begin{Ldescription}
-          \item<2->[文字（$c$）]
-            \begin{tabular}{l}
-              \texttt{char } $c$ \\
-            \end{tabular}
-
-          \item<4->[選択（$e_1 \mid e_2$）]
-            \begin{tabular}{cl}
-                     & \texttt{split} $L_1\, L_2$  \\
-              $L_1:$ & $e_1$の命令列 \\
-                     & \texttt{jmp} $L_3$ \\
-              $L_2:$ & $e_2$の命令列 \\
-              $L_3:$ & \\
-            \end{tabular}
-        \end{Ldescription}
-      \end{column}
-      \begin{column}{0.4\textwidth}
-        \begin{Ldescription}
-          \item<3->[連結（$e_1e_2$）]
-            \begin{tabular}{l}
-              $e_1$の命令列 \\
-              $e_2$の命令列 \\
-            \end{tabular}
-
-          \item<5->[繰り返し（$e*$）]
-            \begin{tabular}{cl}
-              $L_1:$ & \texttt{split} $L_1\, L_3$  \\
-              $L_2:$ & $e_2$の命令列 \\
-                     & \texttt{jmp} $L_1$ \\
-              $L_3:$ & \\
-            \end{tabular}
-        \end{Ldescription}
-      \end{column}
-    \end{columns}
-  \end{center}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Virtual Machine（VM）を使ったマッチング}
-
-  正規表現\lstinline|/aa*bb*/|をVMのバイトコードへ変換する
-  
-  \begin{exampleblock}{}
-    \begin{center}
-\begin{lstlisting}[style=vm]
-    char a
-    split 2, 4
-    char a
-    jmp 1
-    char b
-    split 6, 8
-    char b
-    jmp 5
-    match
-\end{lstlisting}
-    \end{center}
-  \end{exampleblock}
+  \uncover<2->{
+    \begin{exampleblock}{反例}
+      $l = 1$かつ$|y| > 0, |xy| \le l = 1$より、$|x| = 0, |y| = 1$となる。
+      従って$w = \underbrace{\phantom{1}}_x \underbrace{1}_y\underbrace{11111}_z$とすると、
+      $|xy^2z| = |xyz| + |y| = 6 + 1 = 7$となり、$7$は素数であることから、
+      $xy^2z \not\in L_{np}$となり、ポンピング補題を満さない
+    \end{exampleblock}
+  }
 \end{frame}
 
 \end{document}
