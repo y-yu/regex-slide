@@ -13,3 +13,4 @@
 *.vrb
 *.out
 *.pdf
+!regex.pdf
