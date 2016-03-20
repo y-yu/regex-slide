@@ -1,4 +1,4 @@
-\documentclass[12pt, unicode, svgnames, handout]{beamer}
+\documentclass[12pt, unicode, svgnames]{beamer}
 
 \definecolor{links}{HTML}{2A1B81}
 \hypersetup{colorlinks,linkcolor=,urlcolor=links}
@@ -67,22 +67,26 @@
   \frametitle{自己紹介}
   
   \begin{columns}
-    \begin{column}{0.3\textwidth}
+    \begin{column}{0.25\textwidth}
       \centering
       \begin{figure}
-        \includegraphics[width=.7\textwidth]{img/bird2x.png}
+        \includegraphics[width=\textwidth]{img/bird2x.png}
       \end{figure}
     \end{column}
-    \begin{column}{0.7\textwidth}
+    \begin{column}{0.75\textwidth}
+      次のような記事を書きました
       \begin{Ldescription}
-        \small
         \item<2->[VM型の正規表現エンジンを実装する]
+          \small
           \url{http://qiita.com/yyu/items/84b1a00459408d1a7321}
         \item<3->[正規表現からLLVMへのコンパイラを実装する]
+          \small
           \url{http://qiita.com/yyu/items/a0ef2d2204c137707f3f}
         \item<4->[正規表現のJITコンパイラを実装する]
+          \small
           \url{http://qiita.com/yyu/items/3c4deb39d6b0a7955572}
         \item<5->[正規表現の微分でサブマッチング]
+          \small
           \url{http://qiita.com/yyu/items/1638fd59bedce27ca3a4}
       \end{Ldescription}
     \end{column}
@@ -112,30 +116,6 @@
       \end{shadequote}
     \end{block}
   }
-
-  \uncover<3->{
-    \begin{block}{}
-      \begin{shadequote}[r]{\scriptsize\href{https://ja.wikipedia.org/wiki/\%E6\%AD\%A3\%E8\%A6\%8F\%E8\%A1\%A8\%E7\%8F\%BE}{Wikipedia - 正規表現}}
-        もともと正規表現は形式言語理論において正規言語を表すための手段として導入された。
-      \end{shadequote}
-    \end{block}
-  }
-\end{frame}
-
-\subsection{正規言語}
-\begin{frame}[fragile]
-  \frametitle{正規言語}
-
-  \begin{block}{}
-    \begin{shadequote}[r]{\scriptsize\href{https://ja.wikipedia.org/wiki/\%E6\%AD\%A3\%E8\%A6\%8F\%E8\%A8\%80\%E8\%AA\%9E}{Wikipedia - 正規言語}}
-      \textbf{正規言語}とは、以下に示す性質を満たす形式言語のことである。
-      \begin{itemize}
-        \item<2-> 正規表現で記述可能
-        \item<3-> 非決定性有限オートマトン（NFA）で受理可能
-        \item<4-> 決定性有限オートマトン（DFA）で受理可能
-      \end{itemize}
-    \end{shadequote}
-  \end{block}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -184,11 +164,12 @@
       \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,semithick]
         \tikzstyle{every state}=[fill=green!20, text=black]
       
-        \node[initial,state]     (A)                          {$q_a$};
-        \node[accepting,state]   (B)       [right of=A]       {$q_b$};
-        \node[state]             (C)       [right of=B]       {$q_c$};
+        \node[initial,state]     (A)                                {$q_a$};
+        \node[accepting,state]   (B)       [above right of=A]       {$q_b$};
+        \node[state]             (C)       [below right of=B]       {$q_c$};
       
         \path (A) edge              node {w}     (B)
+                  edge [below]      node {w}     (C)
               (B) edge [loop above] node {v,w}   (B)
                   edge              node {W}     (C)
               (C) edge [bend left]  node {w}     (B)
@@ -428,7 +409,7 @@
     \begin{block}{正規表現の微分}
       $c:wc$という文字列があるとする%
       \footnote[frame]{この文字列$c:wc$は文字$c$が文字列の先頭の1文字で、$cw$は文字列の先頭以外の残りを表す}。
-      ある正規表現$r$が文字列$w:wc$にマッチするならば、
+      ある正規表現$r$が文字列$c:wc$にマッチするならば、
       $r$を文字$c$で微分した正規表現$r_c$は文字列$wc$にマッチする。
     \end{block}
   }
@@ -497,28 +478,24 @@
 \section{正規表現 vs C++}
 \begin{frame}
   \centering
-  {\Huge 正規表現 vs C++\footnote[frame]{この内容は新屋さんの成果です}}
+  {\Huge 正規表現 vs C++\footnote[frame]{この内容はほとんどが\href{http://sinya8282.sakura.ne.jp/?p=1013}{新屋さんの成果}です}}
 \end{frame}
 
 \subsection{C++}
 \begin{frame}[fragile]
-  \frametitle{Hello, world!}
+  \frametitle{\texttt{w}を表示するプログラム}
 
-  \begin{exampleblock}{Hello, world!}
+  \begin{exampleblock}{\texttt{w}を表示するプログラム}
+    \begin{shadequote}[r]{\scriptsize\href{http://d.hatena.ne.jp/pepshiso/20110821/1313947582}{C++で40バイトのHello Worldを書いた}}
 \begin{lstlisting}[style=cpp]
-#include <iostream>
-
-int main()
-{
-    std::cout << "Hello, World!\n";
-    return 0;
-}
+main(){__builtin_puts("w");}
 \end{lstlisting}
+    \end{shadequote}
   \end{exampleblock}
 
   \begin{itemize}
-    \item<2-> \texttt{Hello, world!}を表示するC++のプログラム
-    \item<3-> 全体で86 Byte
+    \item<2-> \texttt{w}を表示するC++のプログラム
+    \item<3-> 全体で28 Byte
   \end{itemize}
 
 \end{frame}
@@ -543,34 +520,23 @@ int main()
         prog &::= abs \mid prog\, \mathtt{v}\, abs \mid prog\, \mathtt{v}\, app^* 
       \end{align*}
     \item<5-> 文法を\textbf{正規表現}で表せる \\
-      \lstinline{w+(W+w+)*((vw*)(W+w+)*)*}
+      \lstinline{w((w|v)*(W+w)*)*}
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Hello, world!}
+  \frametitle{\texttt{w}を表示するプログラム}
 
-  \begin{exampleblock}{Hello, world!}
-    \begin{shadequote}[r]{\scriptsize\url{http://d.hatena.ne.jp/rst76/20080708/1215507578}}
+  \begin{exampleblock}{\texttt{w}を表示するプログラム}
 \begin{lstlisting}[style=grass]
-wvwwWWwWWWwvWwwwwWWwWWWwWWWWwWWWWWwWWWWWWwWWWWWWWwWwwwwww
-wwwwwwWWWWwWWWWWWWwWWWWWWWWWWWWWWwWWWWWWWWWWWwwWWWWWWWWWW
-wwWWWWWWWWWWWWwWWWWWWWWWWwwWWWWWWWWWWwwwwwwWWWWWWWWWWWWWW
-WwWWWWWWWWWWWWWWWWWWWWWwWWWWWWWWWWWWWWWWWWwwWWWWWWWWWWWWW
-WWWWwwWWWWWWWWWWWWWWWWWwwwwwWWWWWWWWWWWWWWWWWWWWwwWWWWWWW
-WWWWWWWWWWWWWWWwWWWWWWWWWWWWWWWWWWWWWWWWWwwwwwwwwwwwwwwww
-wwwwwwwwwwWwwwwwwwwwwWWwwwwwwwWWWwwwwwwwWWWWwWWWWWwwwwwww
-wWWWWWWwwwwwwwwwwwwwwwwWWWWWWWwwwwwwwwwwwwwwwwwwwwWWWWWWW
-WwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwWWWWWWWWWwwwwWWWWWWW
-WWWwwwwwwwwwwwWWWWWWWWWWWwwwwwwwWWWWWWWWWWWWwwwwwwwwwwwww
-wwwwwWWWWWWWWWWWWWwwwwwwwwwwwwwwwwwwwwwwwww
+wwWwvWWwwwwvwvwvWwvwWwwvvvvvv
 \end{lstlisting}
-    \end{shadequote}
   \end{exampleblock}
 
   \begin{itemize}
-    \item<2-> Grassで\texttt{Hello, world!}を表示するプログラム
-    \item<3-> 613 Byte
+    \item<2-> Grassで\texttt{w}を表示するプログラム
+    \item<3-> このプログラムは29 Byte
+    \item<4-> C++より1 Byte大きい
   \end{itemize}
 \end{frame}
 
@@ -584,44 +550,46 @@ wwwwwWWWWWWWWWWWWWwwwwwwwwwwwwwwwwwwwwwwwww
     \end{shadequote}
   \end{block}
 
-  \uncover<2-> {
-    ある文字列が、ある正規表現が表す集合の何番目に位置するのか計算するプログラム
-  }
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Hello, world!}
-
-  \texttt{Hello, world!}を表示するプログラムは
-  \uncover<2->{
-    \begin{exampleblock}{}
-      206602040924489026801307911538805854455198744538070639182
-      690880761572424911476339257257386704995410169812907136566
-      327541800453415305636200196255437899960016989064923911660
-      800780259871999465815761462533370076235558393587722548474
-      1358948834773649859816115717
-    \end{exampleblock}
-    番目のGrassプログラム
-  }
-
   \begin{itemize}
-    \item<3-> バイナリにすれば107 Byte
-    \item<4-> C++と比べて21 Byte差
-    \item<5-> 正規表現を工夫すれば、もっと小さくなる（かも）
+    \item<2-> ある文字列が、ある正規表現が表す集合の何番目に位置するのか計算するプログラム
+    \item<3-> 文字列から番号、番号から文字列、どちらも変換できる
+    \item<4-> 番号に変換すれば、C++並に短くなるはず
   \end{itemize}
 \end{frame}
 
-\section{参考文献}
-\begin{frame}
-  \frametitle{参考文献}
+\begin{frame}[fragile]
+  \frametitle{\texttt{w}を表示するプログラム}
 
-  \nocite{*}
-  \bibliographystyle{jplain}
-  \bibliography{ref}
+  \texttt{w}を表示するプログラムは
+  \uncover<2->{
+    \begin{exampleblock}{}
+      \centering
+      \LARGE
+      469787137681
+    \end{exampleblock}
+    \begin{flushright}
+      番目のGrassプログラム
+    \end{flushright}
+  }
+
+  \begin{itemize}
+    \item<3-> この数字はテキストで12 Byte
+    \item<4-> C++と比べて16 Byte小さい
+    \item<5-> C++に勝利した
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \tableofcontents
+\end{frame}
+
+\section{おすすめの文献}
+\begin{frame}
+  \frametitle{おすすめの文献}
+
+  \nocite{*}
+  \bibliographystyle{jplain}
+  \bibliography{ref}
 \end{frame}
 
 \begin{frame}
